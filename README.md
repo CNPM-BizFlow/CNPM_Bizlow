@@ -1,4 +1,4 @@
-# CNPM_Bizlow
+# CNPM_BizFlow
 # English: Platform to support digital transformation for household businesses.
 - Vietnamese: Nền tảng hỗ trợ chuyển đổi số cho hộ kinh doanh. 
 - Abbreviation: BizFlow 
