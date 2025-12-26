@@ -3,7 +3,6 @@
 - Vietnamese: Nền tảng hỗ trợ chuyển đổi số cho hộ kinh doanh. 
 - Abbreviation: BizFlow 
 ## 1.Context: 
-
 In Vietnam, household businesses play a critical role in the local economy, especially in traditional sectors such as building materials, construction supplies, and hardware retail. The majority of these fall under Group 1 or Group 2 classifications as defined by the Ministry of Finance's Decision 3389/QĐ-BTC (2025).
 
 Consequently, most of these businesses still operate using fully manual workflows. Daily tasks such as recording sales, managing inventory, tracking customer debts, and processing phone/Zalo orders are typically performed with handwritten notebooks or simple Excel files. Moreover, household businesses often lack the budget to hire accountants.
@@ -71,7 +70,6 @@ To address this gap, we propose developing a Platform to support digital transfo
 #### 2.Performance & Scalability:
 - Application responds quickly (< 2000 ms for core actions). 
 - Supports large product catalogs and multiple concurrent users
- 
 #### 3.Reliability & AI Accuracy:
 - Employees or owners can review, edit, or reject AI-generated draft orders.
 - Fall back to manual operation if AI is unavailable. 
