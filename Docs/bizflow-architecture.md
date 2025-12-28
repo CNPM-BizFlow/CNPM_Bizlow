@@ -1,6 +1,5 @@
 # Architecture
-
-bizflow
+```bash
 ├── migrations/                 
 ├── scripts/
 │   └── run_postgres.sh         
@@ -66,3 +65,4 @@ bizflow
 │   └── logging.py
 │
 └── README.md
+```
