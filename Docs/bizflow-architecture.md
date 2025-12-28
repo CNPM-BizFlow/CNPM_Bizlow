@@ -1,18 +1,18 @@
 # Archỉtecture
 
 bizflow
-├── migrations/                 # migrate database
+├── migrations/                 
 ├── scripts/
-│   └── run_postgres.sh         # chạy DB local
+│   └── run_postgres.sh         
 │
 ├── src/
-│   ├── api/                    # tầng giao tiếp (REST API)
-│   │   ├── controllers/        # nhận request từ FE
+│   ├── api/                    
+│   │   ├── controllers/        
 │   │   │   ├── order_controller.py
 │   │   │   ├── product_controller.py
 │   │   │   └── auth_controller.py
 │   │   │
-│   │   ├── schemas/            # validate request/response
+│   │   ├── schemas/            
 │   │   │   ├── order_schema.py
 │   │   │   └── product_schema.py
 │   │   │
@@ -20,29 +20,29 @@ bizflow
 │   │   ├── requests.py
 │   │   └── responses.py
 │   │
-│   ├── domain/                 # TRÁI TIM NGHIỆP VỤ (ERD LOGIC)
+│   ├── domain/                 
 │   │   ├── models/
-│   │   │   ├── user.py         # Owner / Employee / Admin
+│   │   │   ├── user.py         
 │   │   │   ├── store.py
 │   │   │   ├── product.py
 │   │   │   ├── order.py
 │   │   │   ├── customer.py
 │   │   │   └── debt.py
 │   │   │
-│   │   ├── constants.py        # role, order_status
+│   │   ├── constants.py        
 │   │   └── exceptions.py
 │   │
-│   ├── services/               # USE CASE (xử lý nghiệp vụ)
+│   ├── services/               
 │   │   ├── create_order_service.py
 │   │   ├── confirm_draft_order_service.py
 │   │   ├── record_debt_service.py
 │   │   └── report_service.py
 │   │
-│   ├── infrastructure/         # DB + ORM + service ngoài
+│   ├── infrastructure/        
 │   │   ├── databases/
-│   │   │   └── db.py           # init SQLAlchemy
+│   │   │   └── db.py           
 │   │   │
-│   │   ├── models/             # ORM MODELS (TABLE)
+│   │   ├── models/             
 │   │   │   ├── user_model.py
 │   │   │   ├── store_model.py
 │   │   │   ├── product_model.py
@@ -50,12 +50,12 @@ bizflow
 │   │   │   ├── order_item_model.py
 │   │   │   └── customer_model.py
 │   │   │
-│   │   ├── repositories/       # cầu nối domain ↔ database
-│   │   │   ├── order_repository.py
+│   │   ├── repositories/       
+│   │   │   ├── order_repository.py 
 │   │   │   ├── product_repository.py
 │   │   │   └── customer_repository.py
 │   │   │
-│   │   └── services/           # AI, email, notification
+│   │   └── services/           
 │   │       └── ai_service.py
 │   │
 │   ├── app.py
