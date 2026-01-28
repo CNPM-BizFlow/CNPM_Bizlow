@@ -1,148 +1,149 @@
-from flask import Blueprint, request, jsonify, current_app
-from datetime import datetime, timedelta
-from infrastructure.models.user_model import UserModel
-from infrastructure.databases.mssql import session
-from api.schemas.auth import RigisterUserRequestSchema,RigisterUserResponseSchema
+# Auth Controller - Authentication endpoints
+
+from flask import Blueprint, request
+from flasgger import swag_from
+from api.responses import success_response, error_response
+from api.decorators import require_auth
 from services.auth_service import AuthService
-from infrastructure.repositories.auth_repository import AuthRepository
-from hashlib import sha256
-import jwt
-from werkzeug.security import generate_password_hash, check_password_hash
-auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
-auth_service = AuthService(AuthRepository(session))
-register_request = RigisterUserRequestSchema()
-register_response = RigisterUserResponseSchema()
-@auth_bp.route('/check_router', methods=['GET'])
-def check_router():
-    """
-    Check router
-    ---
-    get:
-      summary: Check router health
-      tags:
-        - Auth
-      responses:
-        200:
-          description: Router is working
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-    """
-    return jsonify({'message': 'Router is working!'}), 200
+from domain.exceptions import BizFlowException
+
+auth_bp = Blueprint('auth', __name__, url_prefix='/api/v1/auth')
+
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
     """
-    Login user
+    User login
     ---
-    post:
-      summary: Login user
-      requestBody:
+    tags:
+      - Authentication
+    parameters:
+      - in: body
+        name: body
         required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LoginUserRequest'
-      tags:
-        - Auth
-      responses:
-        200:
-          description: Successful login
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LoginUserResponse'
-        401:
-          description: Invalid credentials
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
+        schema:
+          type: object
+          required:
+            - email
+            - password
+          properties:
+            email:
+              type: string
+              example: owner@bizflow.vn
+            password:
+              type: string
+              example: password123
+    responses:
+      200:
+        description: Login successful
+        schema:
+          type: object
+          properties:
+            success:
+              type: boolean
+            data:
+              type: object
+              properties:
+                access_token:
+                  type: string
+                refresh_token:
+                  type: string
+                user:
+                  type: object
+      401:
+        description: Invalid credentials
     """
-    data = request.get_json()
-    username=data['username'],
-    password=data['password']
-    password = generate_password_hash(password)
-    user = auth_service.login(username, password)
-    if not user:
-        return jsonify({'error': 'Invalid credentials'}), 401
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return error_response("VALIDATION_ERROR", "Request body is required", status_code=400)
+        
+        email = data.get('email')
+        password = data.get('password')
+        
+        if not email or not password:
+            return error_response("VALIDATION_ERROR", "Email và mật khẩu là bắt buộc", status_code=400)
+        
+        result = AuthService.login(email, password)
+        return success_response(data=result, message="Đăng nhập thành công")
+    
+    except BizFlowException as e:
+        return error_response(e.code, e.message, e.details, e.status_code)
+    except Exception as e:
+        return error_response("INTERNAL_ERROR", str(e), status_code=500)
 
-    payload = {
-        'user_id': user.id,
-        'exp': datetime.utcnow() + timedelta(hours=2)
-    }
-    token = jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')
-    return jsonify({'token': token})
 
-
-@auth_bp.route('/signup', methods=['POST'])
-def register():
+@auth_bp.route('/register-admin', methods=['POST'])
+def register_admin():
     """
-    Register a new user
+    Register initial admin (first-time setup only)
     ---
-    post:
-      summary: Register a new user
-      requestBody:
+    tags:
+      - Authentication
+    parameters:
+      - in: body
+        name: body
         required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RigisterUserRequest'
-      tags:
-        - Auth
-      responses:
-        201:
-          description: User registered successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RigisterUserResponse'
-        400:
-          description: Invalid input or user exists
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
+        schema:
+          type: object
+          required:
+            - email
+            - password
+            - full_name
+          properties:
+            email:
+              type: string
+            password:
+              type: string
+            full_name:
+              type: string
+    responses:
+      201:
+        description: Admin created
+      409:
+        description: Admin already exists
     """
-    data = request.get_json()
-    errors = register_request.validate(data)
-    if errors:
-      return jsonify(errors), 400
-    # Lay thong tin tu nguoi dung truyen vao
+    try:
+        data = request.get_json()
+        
+        email = data.get('email')
+        password = data.get('password')
+        full_name = data.get('full_name')
+        
+        if not all([email, password, full_name]):
+            return error_response("VALIDATION_ERROR", "Thiếu thông tin bắt buộc", status_code=400)
+        
+        user = AuthService.register_admin(email, password, full_name)
+        return success_response(data=user.to_dict(), message="Tạo admin thành công", status_code=201)
+    
+    except BizFlowException as e:
+        return error_response(e.code, e.message, e.details, e.status_code)
+    except Exception as e:
+        return error_response("INTERNAL_ERROR", str(e), status_code=500)
 
-    # Support JSON body and avoid KeyError by using .get()
-    username = data.get('username') if isinstance(data, dict) else None
-    password = data.get('password') if isinstance(data, dict) else None
-    passwordconfirm = data.get('passwordconfirm') if isinstance(data, dict) else None
-    email = data.get('email') if isinstance(data, dict) else None
 
-    if not username or not password or not passwordconfirm or not email:
-      return jsonify({'message': 'Missing required fields: username, password, passwordconfirm, email'}), 400
-
-    if password != passwordconfirm:
-      return jsonify({'message': 'Passwords do not match'}), 400
-
-    if auth_service.check_exist(username):
-      return jsonify({'message': 'User already exists. Please login.'}), 400
-    #  vieets theo kien truc clean architecture
-    # password_hashed = Str.encode()(password)
-    password_hashed =generate_password_hash(password)
-    new_user = auth_service.register(username, password_hashed, email)
-    if not new_user:
-      return jsonify({'message': 'Registration failed'}), 500 
-    result = register_response.dump(new_user)
-    return jsonify(result), 201
-
-    #     return redirect(url_for('login'))
-
-    # return render_template('register.html')
+@auth_bp.route('/me', methods=['GET'])
+@require_auth
+def get_me():
+    """
+    Get current user info
+    ---
+    tags:
+      - Authentication
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Current user info
+    """
+    try:
+        from flask import g
+        identity = g.current_user_identity
+        user = AuthService.get_current_user(identity)
+        return success_response(data=user.to_dict())
+    
+    except BizFlowException as e:
+        return error_response(e.code, e.message, e.details, e.status_code)
+    except Exception as e:
+        return error_response("INTERNAL_ERROR", str(e), status_code=500)

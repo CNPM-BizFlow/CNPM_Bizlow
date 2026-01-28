@@ -1,184 +1,160 @@
-# Architecture
+# BizFlow - Nền Tảng Chuyển Đổi Số Cho Hộ Kinh Doanh
+
+**BizFlow** là nền tảng Backend API hỗ trợ chuyển đổi số cho các hộ kinh doanh vừa và nhỏ, cung cấp giải pháp quản lý bán hàng, kho, công nợ, và báo cáo tài chính tuân thủ Thông tư 88/2021/TT-BTC.
+
+## Tính Năng Chính (MVP)
+
+### 1. Quản Lý Bán Hàng & Đơn Hàng
+- Tạo đơn hàng tại quầy (POS) nhanh chóng.
+- Hỗ trợ bán chịu (ghi nợ) và theo dõi công nợ khách hàng.
+- Tự động trừ kho khi xác nhận đơn hàng.
+- **AI Draft Order**: Hỗ trợ tạo đơn nháp từ ngôn ngữ tự nhiên (Vd: "Lấy 5 bao xi măng cho chú Ba, ghi nợ").
+
+### 2. Quản Lý Kho & Sản Phẩm
+- Theo dõi tồn kho theo thời gian thực.
+- Hỗ trợ nhập kho, xuất kho, kiểm kê.
+- Quản lý sản phẩm với nhiều đơn vị tính (bao, kg, cái, thùng...).
+
+### 3. Khách Hàng & Công Nợ
+- Quản lý thông tin khách hàng và lịch sử mua hàng.
+- Theo dõi hạn mức công nợ và lịch sử thanh toán.
+
+### 4. Báo Cáo & Tài Chính
+- Báo cáo doanh thu theo ngày/tháng.
+- Báo cáo công nợ phải thu.
+- **Tuân thủ TT88**: Tự động tạo các bút toán doanh thu, nhập/xuất kho theo quy định.
+
+### 5. Phân Quyền (RBAC)
+- **Admin**: Quản trị hệ thống, tạo tài khoản chủ cửa hàng.
+- **Owner**: Quản lý toàn bộ hoạt động cửa hàng, xem báo cáo.
+- **Employee**: Bán hàng, tạo đơn, theo dõi kho (nhưng không xem báo cáo tài chính).
+
+---
+
+## Công Nghệ Sử Dụng
+
+- **Backend**: Python (Flask)
+- **Database**: MySQL 8.0
+- **Cache**: Redis (Optional)
+- **ORM**: SQLAlchemy
+- **Auth**: JWT (Flask-JWT-Extended)
+- **API Docs**: Swagger/OpenAPI
+
+---
+
+##  Hướng Dẫn Cài Đặt & Chạy
+
+### Yêu Cầu
+- Python 3.10+
+- MySQL Server (hoặc Docker)
+- Redis (Tùy chọn)
+
+### Cách 1: Chạy Local (Dev)
+
+1. **Chuẩn bị Database**
+   Chạy lệnh SQL để tạo database:
+   ```sql
+   CREATE DATABASE bizflow CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   ```
+   Cấu hình file `.env` trong thư mục `src`:
+   ```ini
+   MYSQL_USER=root
+   MYSQL_PASSWORD=your_password
+   MYSQL_DATABASE=bizflow
+   ```
+
+2. **Cài đặt thư viện**
+   ```bash
+   # Kích hoạt môi trường ảo
+   .venv\Scripts\activate  # Windows
+   source .venv/bin/activate  # Linux/Mac
+
+   # Cài đặt requirements
+   pip install -r src/requirements.txt
+   ```
+
+3. **Khởi chạy Server**
+   ```bash
+   python .\src\app.py
+   ```
+   Server sẽ chạy tại: `http://localhost:9999`
+
+4. **Tạo Dữ Liệu Mẫu**
+   Mở terminal khác và chạy:
+   ```bash
+   python src/seed.py
+   ```
+
+### Cách 2: Chạy bằng Docker Compose
 
 ```bash
-    ├── migrations
-    ├── scripts
-    │   └── run_postgres.sh
-    ├── src
-    │   ├── api
-    │   │   ├── controllers
-    │   │   │   └── ...  # controllers for the api
-    │   │   ├── schemas
-    │   │   │   └── ...  # Marshmallow schemas
-    │   │   ├── middleware.py
-    │   │   ├── responses.py
-    │   │   └── requests.py
-    │   ├── infrastructure
-    │   │   ├── services
-    │   │   │   └── ...  # Services that use third party libraries or services (e.g. email service)
-    │   │   ├── databases
-    │   │   │   └── ...  # Database adapaters and initialization
-    │   │   ├── repositories
-    │   │   │   └── ...  # Repositories for interacting with the databases
-    │   │   └── models
-    │   │   │   └── ...  # Database models
-    │   ├── domain
-    │   │   ├── constants.py
-    │   │   ├── exceptions.py
-    │   │   ├── models
-    │   │   │   └── ...  # Business logic models
-    │   ├── services
-    │   │    └── ...  # Services for interacting with the domain (business logic)
-    │   ├── app.py
-    │   ├── config.py
-    │   ├── cors.py
-    │   ├── create_app.py
-    │   ├── dependency_container.py
-    │   ├── error_handler.py
-    │   └── logging.py
+docker-compose up -d --build
 ```
 
-## Domain Layer
+---
 
-## Services Layer
+##  API Documentation
 
-## Infrastructure Layer
+Truy cập Swagger UI để xem và test API:
+ **[http://localhost:9999/docs](http://localhost:9999/docs)**
 
-## Download source code (CMD)
-    git clone https://github.com/ChienNguyensrdn/Flask-CleanArchitecture.git
-## Kiểm tra đã cài python đã cài đặt trên máy chưa
-    python --version
-## Run app
+### Tài Khoản Test Mặc Định
 
- - Bước 1: Tạo môi trường ảo co Python (phiên bản 3.x)
-     ## Windows:
-     		py -m venv .venv
-     ## Unix/MacOS:
-     		python3 -m venv .venv
-   - Bước 2: Kích hoạt môi trường:
-     ## Windows:
-     		.venv\Scripts\activate.ps1
-     ### Nếu xảy ra lỗi active .venv trên winos run powershell -->Administrator
-         Set-ExecutionPolicy RemoteSigned -Force
-     ## Unix/MacOS:
-     		source .venv/bin/activate
-     
-   - Bước 3: Cài đặt các thư viện cần thiết
-     ## Install:
-     		pip install -r requirements.txt
-   - Bước 4: Chạy mã xử lý dữ liệu
-     ## Run:
-    		python app.py
+| Vai Trò | Email | Mật Khẩu | Ghi Chú |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin@bizflow.vn` | `admin123` | Quản trị hệ thống |
+| **Owner** | `owner@bizflow.vn` | `owner123` | Chủ cửa hàng |
+| **Employee** | `nhanvien@bizflow.vn` | `nhanvien123` | Nhân viên bán hàng |
 
+---
 
-     Truy câp http://localhost:6868/docs
-     Truy câp http://localhost:9999/docs
+##  Ví Dụ Sử Dụng (Curl)
 
+### Đăng Nhập (Lấy Token)
+```bash
+curl -X POST http://localhost:9999/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "owner@bizflow.vn", "password": "owner123"}'
+```
 
+### Tạo Đơn Hàng Mới
+```bash
+curl -X POST http://localhost:9999/api/v1/orders \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "store_id": 1,
+    "customer_id": 1,
+    "items": [
+      {"product_unit_id": 1, "quantity": 10},
+      {"product_unit_id": 3, "quantity": 5}
+    ]
+  }'
+```
 
-## Create file .env in folder /src/.env
-    
-    # Flask settings
-    FLASK_ENV=development
-    SECRET_KEY=your_secret_key
-    
-    # SQL Server settings
-    DB_USER=sa
-    DB_PASSWORD=Aa@123456
-    DB_HOST=127.0.0.1
-    DB_PORT=1433
-    DB_NAME=FlaskApiDB
-    
-    
-    DATABASE_URI = "mssql+pymssql://sa:Aa%40123456@127.0.0.1:1433/FlaskApiDB"
+### Tạo Draft Order bằng AI (Text)
+```bash
+curl -X POST http://localhost:9999/api/v1/ai/draft-orders \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "store_id": 1,
+    "text": "Lấy 10 bao xi măng cho chú Ba, ghi nợ"
+  }'
+```
 
-## pull image MS SQL server 
-    
-    ```bash
-    docker pull mcr.microsoft.com/mssql/server:2025-latest
-    ```
-## Install MS SQL server in docker 
-    ```bash
-    docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=Aa123456" -p 1433:1433 --name sql1 --hostname sql1 -d  mcr.microsoft.com/mssql/server:2025-latest
-    ```
-## Test connect SQL server 
+---
 
-## ORM Flask (from sqlalchemy.orm )
-Object Relational Mapping
+##  Cấu Trúc Dự Án (Clean Architecture)
 
-Ánh xạ 1 class (OOP)  model src/infrastructure/models --> Table in database 
-Ánh xạ các mối quan hệ (Relational) -- Khoá ngoại CSDL 
-(n-n): many to many 
-
-@startuml
-' Diagram Title
-title Clean Architecture Sequence Diagram
-
-' Define participants in order of appearance
-actor Actor
-participant "Web App"
-participant "Controller"
-participant "Services"
-participant "Domain"
-participant "infrastructure"
-database "Database"
-
-' --- Message Flow ---
-
-' 1. Initial Request
-Actor -> "Web App": Request
-activate "Web App"
-
-' 2. Forwarding to Controller
-"Web App" -> "Controller"
-activate "Controller"
-
-' 3. Calling the Service Layer
-"Controller" -> "Services"
-activate "Services"
-
-' 4. Interacting with the Domain Layer
-"Services" -> "Domain"
-activate "Domain"
-note over Domain: Interfaces
-
-' 5. Interacting with Infrastructure
-"Domain" -> "infrastructure"
-activate "infrastructure"
-note over infrastructure: Class implement
-
-' 6. Database Query
-"infrastructure" -> "Database"
-activate "Database"
-
-' --- Response Flow (Return Messages) ---
-
-' 7. Database returns data
-"Database" --> "infrastructure"
-deactivate "Database"
-
-' 8. Infrastructure returns to Domain
-"infrastructure" --> "Domain"
-deactivate "infrastructure"
-
-' 9. Domain returns to Services
-"Domain" --> "Services"
-deactivate "Domain"
-
-' 10. Services returns to Controller
-"Services" --> "Controller"
-deactivate "Services"
-
-' 11. Controller returns to Web App
-"Controller" --> "Web App"
-deactivate "Controller"
-
-' 12. Final data rendering to Actor
-"Web App" --> Actor
-note left of "Web App"
-  Render data
-end note
-deactivate "Web App"
-
-@enduml
-=======
+```
+src/
+├── api/                # Controllers & Routes
+├── domain/             # Business Rules & Entities
+├── services/           # Application Logic
+├── infrastructure/     # Database Models & External Services
+├── app.py              # Main Application Entry
+├── config.py           # App Configuration
+├── seed.py             # Sample Data Script
+└── requirements.txt    # Python Dependencies
+```
